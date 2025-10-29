@@ -26,6 +26,7 @@ function PublicNotes() {
   return (
     <div className="p-4">
       <h2 className="text-2xl font-bold mb-4">Public Notes</h2>
+      <a href="/home-public">Back</a>
       {error && <div className="text-red-500 mb-4">{error}</div>}
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">

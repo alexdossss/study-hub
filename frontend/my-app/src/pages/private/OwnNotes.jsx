@@ -68,6 +68,7 @@ function OwnNotes() {
   return (
     <div className="p-4">
       <h2 className="text-2xl font-bold mb-4">My Notes</h2>
+      <a href="/home">Back</a>
       {error && <div className="text-red-500 mb-4">{error}</div>}
       
       <button
