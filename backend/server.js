@@ -7,6 +7,7 @@ import noteRoutes from './routes/noteRoutes.js';
 import { fileURLToPath } from 'url';
 import { dirname, join } from 'path';
 import fs from 'fs';
+import path from 'path';
 
 dotenv.config();
 const app = express();
@@ -28,6 +29,15 @@ app.use(express.urlencoded({ extended: true }));
 
 // Serve uploaded files statically
 app.use('/uploads', express.static(uploadsDir));
+
+// Add this middleware (replace 5173 with your dev port if different)
+app.use((req, res, next) => {
+  // Remove or relax X-Frame-Options (avoid SAMEORIGIN blocking cross-origin if iframe served from backend)
+  res.removeHeader('X-Frame-Options');
+  // Allow the frontend origin to embed backend-served files
+  res.setHeader('Content-Security-Policy', "frame-ancestors 'self' http://localhost:5173 http://127.0.0.1:5173");
+  next();
+});
 
 // Routes
 app.use('/api/users', userRoutes);

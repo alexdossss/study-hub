@@ -6,6 +6,7 @@ import Home from "./pages/Home";
 import HomePublic from "./pages/HomePublic";
 import OwnNotes from "./pages/private/OwnNotes";
 import PublicNotes from "./pages/public/PublicNotes";
+import ViewNote from './pages/ViewNote';
 
 // Protected Route wrapper component
 const ProtectedRoute = ({ children }) => {
@@ -76,6 +77,11 @@ function App() {
         <Route path="/public-notes" element={
           <ProtectedRoute>
             <PublicNotes />
+          </ProtectedRoute>
+        } />
+        <Route path="/notes/:id" element={
+          <ProtectedRoute>
+            <ViewNote />
           </ProtectedRoute>
         } />
         <Route path="/" element={null} />

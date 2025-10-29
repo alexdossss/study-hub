@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import CreateNoteModal from '../../components/notes/CreateNoteModal';
 import EditNoteModal from '../../components/notes/EditNoteModal';
+import { useNavigate } from 'react-router-dom';
 
 function OwnNotes() {
   const [notes, setNotes] = useState([]);
@@ -11,6 +12,7 @@ function OwnNotes() {
   const [error, setError] = useState('');
 
   const userInfo = JSON.parse(localStorage.getItem('userInfo'));
+  const navigate = useNavigate();
 
   useEffect(() => {
     fetchNotes();
@@ -65,6 +67,12 @@ function OwnNotes() {
     }
   };
 
+  const handleView = (noteId) => {
+    navigate(`/notes/${noteId}`, {
+      state: { from: 'private' }
+    });
+  };
+
   return (
     <div className="p-4">
       <h2 className="text-2xl font-bold mb-4">My Notes</h2>
@@ -86,33 +94,24 @@ function OwnNotes() {
             
             {note.type === 'file' && note.fileUrl && (
               <div className="mt-2">
-                {note.fileUrl.match(/\.(jpg|jpeg|png)$/i) ? (
-                  <img 
-                    src={`http://localhost:5000/${note.fileUrl}`} 
-                    alt={note.title}
-                    className="max-w-full h-auto"
-                  />
-                ) : (
-                  <a 
-                    href={`http://localhost:5000/${note.fileUrl}`}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="text-blue-500"
-                  >
-                    View File
-                  </a>
-                )}
+                <button 
+                  onClick={() => handleView(note._id)}
+                  className="bg-blue-500 text-white px-4 py-2 rounded"
+                >
+                  View Note
+                </button>
               </div>
             )}
 
             {note.type === 'google_docs' && note.docsUrl && (
-              <iframe
-                src={note.docsUrl}
-                title={note.title}
-                width="100%"
-                height="300"
-                className="mt-2"
-              />
+              <div className="mt-2">
+                <button 
+                  onClick={() => handleView(note._id)}
+                  className="bg-blue-500 text-white px-4 py-2 rounded"
+                >
+                  View Note
+                </button>
+              </div>
             )}
 
             <div className="mt-4 flex gap-2">
