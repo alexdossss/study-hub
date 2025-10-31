@@ -3,6 +3,7 @@ import asyncHandler from 'express-async-handler';
 import multer from 'multer';
 import path from 'path';
 import fs from 'fs';  // Add this import for file operations
+import User from '../models/userModel.js'; // add this near top if not present
 
 // Configure multer storage
 const storage = multer.diskStorage({
@@ -94,13 +95,11 @@ export const createNote = asyncHandler(async (req, res) => {
   });
 });
 
-// Get all notes
 export const getNotes = asyncHandler(async (req, res) => {
   const notes = await Note.find({ user: req.user._id });
   res.json(notes);
 });
 
-// Get a note by id (returns published notes to any authenticated user; private notes only to owner)
 export const getNoteById = asyncHandler(async (req, res) => {
   try {
     const noteId = req.params.id;
@@ -115,16 +114,12 @@ export const getNoteById = asyncHandler(async (req, res) => {
     const ownerId = (note.user && note.user._id) ? note.user._id.toString() : (note.owner ? note.owner.toString() : null);
     const requesterId = req.user && req.user._id ? req.user._id.toString() : null;
 
-    // If not public and not owner -> forbid
     if (!isPublic && !(ownerId && requesterId && ownerId === requesterId)) {
       return res.status(403).json({ message: 'Not authorized to view this note' });
     }
 
-    // Prepare plain object so we can safely modify fields for non-owners
     const noteObj = note.toObject();
 
-    // If this is a public google_docs note and the requester is not the owner,
-    // replace the editable docs URL with a preview (read-only) URL.
     if (noteObj.type === 'google_docs' && isPublic && ownerId !== requesterId) {
       if (noteObj.docsUrl) {
         const preview = buildGooglePreviewUrl(noteObj.docsUrl);
@@ -139,9 +134,8 @@ export const getNoteById = asyncHandler(async (req, res) => {
   }
 });
 
-// Update note
 export const updateNote = asyncHandler(async (req, res) => {
-  // Use multer upload wrapper so req.file is populated when client sends multipart/form-data
+
   upload(req, res, async (err) => {
     if (err) {
       console.error('Multer upload error in updateNote:', err);
@@ -160,10 +154,8 @@ export const updateNote = asyncHandler(async (req, res) => {
         throw new Error('Note not found');
       }
 
-      // If a new file was uploaded, remove old file (if exists) and set new path
       if (req.file) {
         if (note.fileUrl) {
-          // Resolve possible relative stored path to absolute path
           const oldPath = path.isAbsolute(note.fileUrl)
             ? note.fileUrl
             : path.join(process.cwd(), note.fileUrl);
@@ -173,18 +165,15 @@ export const updateNote = asyncHandler(async (req, res) => {
             }
           } catch (e) {
             console.warn('Could not delete old file at', oldPath, e.message);
-            // don't fail update just because delete failed
           }
         }
         note.fileUrl = req.file.path;
         note.type = 'file';
       } else if (req.body.type === 'google_docs') {
-        // Update google docs url if provided
         note.docsUrl = req.body.docsUrl || note.docsUrl;
         note.type = 'google_docs';
       }
 
-      // Update common fields
       note.title = req.body.title ?? note.title;
       note.description = req.body.description ?? note.description;
 
@@ -257,4 +246,77 @@ export const getPublicNotes = asyncHandler(async (req, res) => {
   });
 
   res.json(result);
+});
+
+// Add bookmark a public note
+export const addBookmark = asyncHandler(async (req, res) => {
+  const noteId = req.params.id;
+  const note = await Note.findById(noteId);
+  if (!note) {
+    res.status(404);
+    throw new Error('Note not found');
+  }
+  // only allow bookmarking public notes
+  const isPublic = !!(note.isPublic || note.published || note.public);
+  if (!isPublic) {
+    res.status(403);
+    throw new Error('Cannot bookmark a private note');
+  }
+
+  const user = await User.findById(req.user._id);
+  if (!user) {
+    res.status(404);
+    throw new Error('User not found');
+  }
+
+  // avoid duplicates
+  const already = user.bookmarks?.some(b => String(b) === String(noteId));
+  if (!already) {
+    user.bookmarks = user.bookmarks ? [...user.bookmarks, noteId] : [noteId];
+    await user.save();
+  }
+
+  // return updated bookmarks (populated)
+  const populated = await User.findById(req.user._id).populate({
+    path: 'bookmarks',
+    populate: { path: 'user', select: 'username' },
+  });
+
+  res.json(populated.bookmarks || []);
+});
+
+// Remove bookmark
+export const removeBookmark = asyncHandler(async (req, res) => {
+  const noteId = req.params.id;
+  const user = await User.findById(req.user._id);
+  if (!user) {
+    res.status(404);
+    throw new Error('User not found');
+  }
+
+  user.bookmarks = (user.bookmarks || []).filter(b => String(b) !== String(noteId));
+  await user.save();
+
+  const populated = await User.findById(req.user._id).populate({
+    path: 'bookmarks',
+    populate: { path: 'user', select: 'username' },
+  });
+
+  res.json(populated.bookmarks || []);
+});
+
+// Get current user's bookmarked notes
+export const getUserBookmarks = asyncHandler(async (req, res) => {
+  const user = await User.findById(req.user._id).populate({
+    path: 'bookmarks',
+    populate: { path: 'user', select: 'username' },
+    options: { sort: { createdAt: -1 } }
+  });
+
+  if (!user) {
+    res.status(404);
+    throw new Error('User not found');
+  }
+
+  res.json(user.bookmarks || []);
 });

@@ -44,6 +44,20 @@ function Home() {
         </button>
 
         <button 
+          onClick={() => navigate('/bookmarks')}
+          style={{
+            padding: "10px 20px",
+            backgroundColor: "#4CAF50",
+            color: "white",
+            border: "none",
+            borderRadius: "5px",
+            cursor: "pointer"
+          }}
+        >
+          BookMarks
+        </button>
+
+        <button 
           onClick={toggleView}
           style={{
             padding: "10px 20px",

@@ -35,11 +35,12 @@ const userSchema = new mongoose.Schema(
       pomodoroSound: { type: String, default: "lofi" },
       focusMode: { type: Boolean, default: false },
     },
+
+    // bookmarks: array of Note ids the user has bookmarked
+    bookmarks: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Note' }],
   },
   { timestamps: true }
 );
-
-// 🔐 Hash password before saving
 userSchema.pre("save", async function (next) {
   if (!this.isModified("password")) return next();
   try {
@@ -51,7 +52,6 @@ userSchema.pre("save", async function (next) {
   }
 });
 
-// 🧩 Compare entered password with hashed password
 userSchema.methods.matchPassword = async function (enteredPassword) {
   return await bcrypt.compare(enteredPassword, this.password);
 };
