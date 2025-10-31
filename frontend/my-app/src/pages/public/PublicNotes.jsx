@@ -65,9 +65,6 @@ function PublicNotes() {
                 </button>
               </div>
             )}
-            <button onClick={() => handleView(note._id)}>
-              View
-            </button>
           </div>
         ))}
       </div>
