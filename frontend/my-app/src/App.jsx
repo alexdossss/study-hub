@@ -8,6 +8,7 @@ import OwnNotes from "./pages/private/OwnNotes";
 import PublicNotes from "./pages/public/PublicNotes";
 import ViewNote from './pages/ViewNote';
 import BookmarkedNotes from './pages/private/BookmarkedNotes';
+import StudyPlanner from "./pages/private/StudyPlanner";
 
 // Protected Route wrapper component
 const ProtectedRoute = ({ children }) => {
@@ -88,6 +89,11 @@ function App() {
         <Route path="/bookmarks" element={
           <ProtectedRoute>
             <BookmarkedNotes />
+          </ProtectedRoute>
+        } />
+        <Route path="/study-planner" element={
+          <ProtectedRoute>
+            <StudyPlanner />
           </ProtectedRoute>
         } />
         <Route path="/" element={null} />
