@@ -53,21 +53,10 @@ export default function BookmarkedNotes() {
   if (loading) return <div style={{ padding: 20 }}>Loading bookmarks…</div>;
   if (error) return <div style={{ padding: 20, color: 'crimson' }}>{error}</div>;
 
-const handleBack = () => {
-    const fromPath = location.state?.fromPath;
-    if (fromPath) return navigate(fromPath);
-    const fromFlag = location.state?.from;
-    if (fromFlag === 'private') return navigate('/home');
-    if (fromFlag === 'public') return navigate('/home-public');
-    if (fromFlag === 'homepage_private') return navigate('/homepage_private');
-    if (fromFlag === 'homepage_public') return navigate('/homepage_public');
-    navigate(-1);
-  };
-
   return (
     <div style={{ maxWidth: 980, margin: '0 auto', padding: 16 }}>
       <h2>Bookmarked Notes</h2>
-      <button onClick={handleBack} style={{ padding: '6px 10px' }}>← Back</button>
+      <a href='/home' style={{ padding: '6px 10px' }}>← Back</a>
       {bookmarks.length === 0 && <div style={{ marginTop: 12 }}>You have no bookmarked notes.</div>}
       <ul style={{ listStyle: 'none', padding: 0 }}>
         {bookmarks.map(note => (

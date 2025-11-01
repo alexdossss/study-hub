@@ -101,22 +101,10 @@ export default function StudyPlanner() {
   // Clear selected date -> sidebar reverts to default view
   const clearSelectedDate = () => setSelectedDate(null);
 
-
-  const handleBack = () => {
-    const fromPath = location.state?.fromPath;
-    if (fromPath) return navigate(fromPath);
-    const fromFlag = location.state?.from;
-    if (fromFlag === 'private') return navigate('/home');
-    if (fromFlag === 'public') return navigate('/home-public');
-    if (fromFlag === 'homepage_private') return navigate('/homepage_private');
-    if (fromFlag === 'homepage_public') return navigate('/homepage_public');
-    navigate(-1);
-  };
-
   return (
     <div style={{ display: 'flex', gap: 12 }}>
       <div style={{ flex: 1 }}>
-        <button onClick={handleBack} style={{ padding: '6px 10px' }}>← Back</button>
+        <a href="/home">Back</a>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
           <h2>Study Planner</h2>
           <div>
@@ -126,15 +114,35 @@ export default function StudyPlanner() {
         </div>
 
         <Calendar
-          localizer={localizer}
-          events={calendarItems}
-          startAccessor="start"
-          endAccessor="end"
-          style={{ height: '75vh' }}
-          selectable
-          onSelectSlot={handleSelectSlot}
-          onSelectEvent={handleSelectEvent}
+        localizer={localizer}
+        events={calendarItems}
+        startAccessor="start"
+        endAccessor="end"
+        style={{ height: '75vh' }}
+        selectable
+        onSelectSlot={handleSelectSlot}
+        onSelectEvent={handleSelectEvent}
+        eventPropGetter={(event) => {
+            let style = {
+            backgroundColor: '#3174ad', 
+            color: 'white',
+            borderRadius: '4px',
+            opacity: 1,
+            textDecoration: 'none',
+            };
+
+            // If event/task is completed, make it lighter and crossed out
+            if (event.isCompleted) {
+            style.backgroundColor = '#a0aec0'; // light gray
+            style.color = '#4a5568'; // dark gray text
+            style.textDecoration = 'line-through';
+            style.opacity = 0.7;
+            }
+
+            return { style };
+        }}
         />
+
       </div>
 
       {/* Sidebar is always visible */}
