@@ -86,6 +86,20 @@ function Home() {
         </button>
 
         <button 
+          onClick={() => navigate('/flashcards')}
+          style={{
+            padding: "10px 20px",
+            backgroundColor: "#007bff",
+            color: "white",
+            border: "none",
+            borderRadius: "5px",
+            cursor: "pointer"
+          }}
+        >
+          Flashcards
+        </button>
+
+        <button 
           onClick={handleLogout}
           style={{
             padding: "10px 20px",

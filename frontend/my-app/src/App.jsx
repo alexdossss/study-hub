@@ -10,6 +10,10 @@ import ViewNote from './pages/ViewNote';
 import BookmarkedNotes from './pages/private/BookmarkedNotes';
 import StudyPlanner from "./pages/private/StudyPlanner";
 
+// new imports for flashcards
+import Flashcards from "./pages/private/Flashcards";
+import FlashcardDeckView from "./pages/private/FlashcardDeckView";
+
 // Protected Route wrapper component
 const ProtectedRoute = ({ children }) => {
   const isAuthenticated = localStorage.getItem("userInfo");
@@ -96,6 +100,19 @@ function App() {
             <StudyPlanner />
           </ProtectedRoute>
         } />
+
+        {/* Flashcards routes (protected) */}
+        <Route path="/flashcards" element={
+          <ProtectedRoute>
+            <Flashcards />
+          </ProtectedRoute>
+        } />
+        <Route path="/flashcards/deck/:deckId" element={
+          <ProtectedRoute>
+            <FlashcardDeckView />
+          </ProtectedRoute>
+        } />
+
         <Route path="/" element={null} />
       </Routes>
     </div>
