@@ -29,6 +29,21 @@ export async function getDecks() {
   return resp.data;
 }
 
+export async function createDeck(payload = { title: '' }) {
+  const resp = await axios.post(`${API_URL}/api/flashcards/decks`, payload, {
+    headers: { 'Content-Type': 'application/json', ...authHeaders() }
+  });
+  return resp.data;
+}
+
+export async function deleteDeck(deckId) {
+  if (!deckId) throw new Error('deckId is required');
+  const resp = await axios.delete(`${API_URL}/api/flashcards/decks/${deckId}`, {
+    headers: { ...authHeaders() }
+  });
+  return resp.data;
+}
+
 // New: fetch a single deck by id (used by FlashcardDeckView.jsx)
 export async function getDeck(deckId) {
   if (!deckId) throw new Error('deckId is required');
@@ -82,10 +97,10 @@ export async function addCards(deckId, cards = []) {
   return resp.data;
 }
 
-// Update a single card by id
+// Update a single card by id (PUT or PATCH supported server-side)
 export async function updateCard(cardId, payload) {
   if (!cardId) throw new Error('cardId is required');
-  const resp = await axios.put(
+  const resp = await axios.patch(
     `${API_URL}/api/flashcards/cards/${cardId}`,
     payload,
     { headers: { 'Content-Type': 'application/json', ...authHeaders() } }
@@ -102,14 +117,29 @@ export async function deleteCard(cardId) {
   return resp.data;
 }
 
+// New: rename a deck
+export async function renameDeck(deckId, title) {
+  if (!deckId) throw new Error('deckId is required');
+  if (!title || !title.trim()) throw new Error('title is required');
+  const resp = await axios.patch(
+    `${API_URL}/api/flashcards/decks/${deckId}`,
+    { title: title.trim() },
+    { headers: { 'Content-Type': 'application/json', ...authHeaders() } }
+  );
+  return resp.data;
+}
+
 // Backwards-compatible default export
 export default {
   getDecks,
+  createDeck,
+  deleteDeck,
   getDeck,
   fetchNotes,
   generateFlashcardsFromText,
   uploadFileAndGenerate,
   addCards,
   updateCard,
-  deleteCard
+  deleteCard,
+  renameDeck
 };

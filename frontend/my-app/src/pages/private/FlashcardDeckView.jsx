@@ -1,12 +1,13 @@
 // frontend/src/pages/private/FlashcardDeckView.jsx
 import React, { useEffect, useState } from "react";
-import { useParams } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 import api from "../../services/flashcardApi";
 import FlashcardGeneratorModal from "../../components/flashcards/FlashcardGeneratorModal";
 import FlashcardStudyMode from "../../components/flashcards/FlashcardStudyMode";
 
 export default function FlashcardDeckView() {
   const { deckId } = useParams();
+  const navigate = useNavigate();
   const [deck, setDeck] = useState(null);
   const [cards, setCards] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -20,10 +21,6 @@ export default function FlashcardDeckView() {
     setLoading(true);
     try {
       const res = await api.getDeck(deckId);
-      // support multiple response shapes:
-      // - axios resp.data => res.data = { deck, cards }
-      // - service returning { deck, cards }
-      // - service returning deck object directly
       let payload = res;
       if (res && res.data) payload = res.data;
       const deckObj = payload?.deck || payload || null;
@@ -45,26 +42,38 @@ export default function FlashcardDeckView() {
   const addCard = async () => {
     if (!newQ.trim() || !newA.trim()) return;
     try {
-      await api.addCards(deckId, [{ question: newQ.trim(), answer: newA.trim() }]);
+      const res = await api.addCards(deckId, [{ question: newQ.trim(), answer: newA.trim() }]);
+      // response returns { inserted } per backend controller
+      const inserted = res?.inserted || res?.insertedDocs || res?.inserted || res;
+      let newCards = [];
+      if (Array.isArray(inserted)) {
+        newCards = inserted;
+      } else if (Array.isArray(res)) {
+        newCards = res;
+      }
+      // append to UI
+      setCards(prev => [...prev, ...newCards]);
       setNewQ("");
       setNewA("");
-      await load();
     } catch (err) {
       console.error(err);
+      alert("Failed to add card");
     }
   };
 
   const saveEdit = async () => {
     if (!editingCard) return;
     try {
-      await api.updateCard(editingCard._id, {
+      const updated = await api.updateCard(editingCard._id, {
         question: editingCard.question,
         answer: editingCard.answer,
       });
+      // Update local state
+      setCards(prev => prev.map(c => (c._id === editingCard._id ? { ...c, ...updated } : c)));
       setEditingCard(null);
-      load();
     } catch (err) {
       console.error(err);
+      alert("Failed to update card");
     }
   };
 
@@ -72,9 +81,21 @@ export default function FlashcardDeckView() {
     if (!window.confirm("Delete this card?")) return;
     try {
       await api.deleteCard(id);
-      await load();
+      setCards(prev => prev.filter(c => (c._id || c.id) !== id));
     } catch (err) {
       console.error(err);
+      alert("Failed to delete card");
+    }
+  };
+
+  const handleDeleteDeck = async () => {
+    if (!window.confirm("Delete this deck and all its cards? This cannot be undone.")) return;
+    try {
+      await api.deleteDeck(deckId);
+      navigate("/flashcards");
+    } catch (err) {
+      console.error("Failed to delete deck:", err);
+      alert("Failed to delete deck");
     }
   };
 
@@ -96,9 +117,16 @@ export default function FlashcardDeckView() {
 
         <button
           onClick={() => setStudyMode((s) => !s)}
-          className="w-full bg-indigo-600 text-white py-2 rounded"
+          className="w-full bg-indigo-600 text-white py-2 rounded mb-3"
         >
           {studyMode ? "Close Study Mode" : "Start Study Mode"}
+        </button>
+
+        <button
+          onClick={handleDeleteDeck}
+          className="w-full bg-red-600 text-white py-2 rounded mb-3"
+        >
+          Delete Deck
         </button>
 
         <hr className="my-3" />

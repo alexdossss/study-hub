@@ -1,7 +1,6 @@
 // backend/controllers/flashcardController.js
 import FlashcardDeck from "../models/FlashcardDeck.js";
 import Flashcard from "../models/Flashcard.js";
-import User from "../models/userModel.js"; // used for optional population checks
 import mongoose from "mongoose";
 
 /*
@@ -85,20 +84,40 @@ const renameDeck = async (req, res) => {
 };
 
 const deleteDeck = async (req, res) => {
+  const session = await mongoose.startSession();
   try {
     const { deckId } = req.params;
-    if (!mongoose.Types.ObjectId.isValid(deckId)) return res.status(400).json({ message: "Invalid deck id" });
+    if (!mongoose.Types.ObjectId.isValid(deckId)) {
+      return res.status(400).json({ message: "Invalid deck id" });
+    }
 
-    const deck = await FlashcardDeck.findById(deckId);
-    if (!deck) return res.status(404).json({ message: "Deck not found" });
-    if (deck.user.toString() !== req.user._id.toString()) return res.status(403).json({ message: "Not authorized" });
+    // start transaction to ensure both deck + cards removed together
+    session.startTransaction();
 
-    await Flashcard.deleteMany({ deck: deck._id });
-    await deck.remove();
+    const deck = await FlashcardDeck.findById(deckId).session(session);
+    if (!deck) {
+      await session.abortTransaction();
+      session.endSession();
+      return res.status(404).json({ message: "Deck not found" });
+    }
+    if (deck.user.toString() !== req.user._id.toString()) {
+      await session.abortTransaction();
+      session.endSession();
+      return res.status(403).json({ message: "Not authorized" });
+    }
+
+    // delete cards and deck within transaction
+    await Flashcard.deleteMany({ deck: deck._id }).session(session);
+    await deck.deleteOne({ session });
+
+    await session.commitTransaction();
+    session.endSession();
 
     return res.json({ message: "Deck and associated cards deleted" });
   } catch (err) {
     console.error(err);
+    try { await session.abortTransaction(); } catch (e) { /* ignore */ }
+    session.endSession();
     return res.status(500).json({ message: "Server error deleting deck" });
   }
 };

@@ -14,7 +14,11 @@ router.delete("/decks/:deckId", protect, flashcardController.deleteDeck);
 
 // Cards inside a deck
 router.post("/decks/:deckId/cards", protect, flashcardController.addCards);
+
+// support both PATCH and PUT for updating a card (frontend may use either)
 router.patch("/cards/:cardId", protect, flashcardController.updateCard);
+router.put("/cards/:cardId", protect, flashcardController.updateCard);
+
 router.delete("/cards/:cardId", protect, flashcardController.deleteCard);
 
 // Public access to public decks (no auth required)
