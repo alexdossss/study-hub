@@ -29,6 +29,7 @@ export default function MyQuizzes() {
   return (
     <div className="p-4 max-w-4xl mx-auto">
       <div className="flex items-center justify-between mb-4">
+        <a href="/home">Back</a>
         <h1 className="text-2xl font-semibold">My Quizzes</h1>
         <div>
           <button onClick={() => setShowCreate(true)} className="px-3 py-1 bg-blue-600 text-white rounded">Create / AI Generate</button>
