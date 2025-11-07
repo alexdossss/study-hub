@@ -9,10 +9,10 @@ import PublicNotes from "./pages/public/PublicNotes";
 import ViewNote from './pages/ViewNote';
 import BookmarkedNotes from './pages/private/BookmarkedNotes';
 import StudyPlanner from "./pages/private/StudyPlanner";
-
-// new imports for flashcards
 import Flashcards from "./pages/private/Flashcards";
 import FlashcardDeckView from "./pages/private/FlashcardDeckView";
+import MyQuizzes from "./pages/private/MyQuizzes";
+import TakeQuiz from './pages/private/TakeQuiz';
 
 // Protected Route wrapper component
 const ProtectedRoute = ({ children }) => {
@@ -112,6 +112,15 @@ function App() {
             <FlashcardDeckView />
           </ProtectedRoute>
         } />
+
+        {/* My Quizzes route (protected) */}
+        <Route path="/my-quizzes" element={
+          <ProtectedRoute>
+            <MyQuizzes />
+          </ProtectedRoute>
+        } />
+
+        <Route path="/quizzes/take/:id" element={<TakeQuiz />} />
 
         <Route path="/" element={null} />
       </Routes>

@@ -100,6 +100,20 @@ function Home() {
         </button>
 
         <button 
+          onClick={() => navigate('/my-quizzes')}
+          style={{
+            padding: "10px 20px",
+            backgroundColor: "#6f42c1",
+            color: "white",
+            border: "none",
+            borderRadius: "5px",
+            cursor: "pointer"
+          }}
+        >
+          My Quizzes
+        </button>
+
+        <button 
           onClick={handleLogout}
           style={{
             padding: "10px 20px",
