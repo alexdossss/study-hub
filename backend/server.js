@@ -7,7 +7,8 @@ import noteRoutes from './routes/noteRoutes.js';
 import studyRoutes from './routes/studyRoutes.js';
 import flashcardRoutes from './routes/flashcardRoutes.js';
 import aiRoutes from './routes/aiRoutes.js';
-import quizRoutes from './routes/quizRoutes.js'; // <-- switched to ES import
+import quizRoutes from './routes/quizRoutes.js';
+import pomodoroRoutes from './routes/pomodoroRoutes.js';
 import { fileURLToPath } from 'url';
 import { dirname, join } from 'path';
 import fs from 'fs';
@@ -54,6 +55,9 @@ app.use('/api/ai', aiRoutes);
 
 // register quiz routes (ES module import)
 app.use('/api/quizzes', quizRoutes);
+
+// register pomodoro routes
+app.use('/api/pomodoro', pomodoroRoutes);
 
 // Connect to database
 connectDB();

@@ -13,6 +13,7 @@ import Flashcards from "./pages/private/Flashcards";
 import FlashcardDeckView from "./pages/private/FlashcardDeckView";
 import MyQuizzes from "./pages/private/MyQuizzes";
 import TakeQuiz from './pages/private/TakeQuiz';
+import Pomodoro from './pages/private/Pomodoro'; // <-- added import
 
 // Protected Route wrapper component
 const ProtectedRoute = ({ children }) => {
@@ -121,6 +122,13 @@ function App() {
         } />
 
         <Route path="/quizzes/take/:id" element={<TakeQuiz />} />
+
+        {/* Pomodoro protected route */}
+        <Route path="/pomodoro" element={
+          <ProtectedRoute>
+            <Pomodoro />
+          </ProtectedRoute>
+        } />
 
         <Route path="/" element={null} />
       </Routes>
