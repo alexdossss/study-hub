@@ -3,6 +3,7 @@ import PomodoroTimer from '../../components/pomodoro/PomodoroTimer';
 import NotesModal from '../../components/pomodoro/NotesModal';
 import FlashcardsModal from '../../components/pomodoro/FlashcardsModal';
 import QuizModal from '../../components/pomodoro/QuizModal';
+import BookmarkModal from '../../components/pomodoro/BookmarkModal';
 import pomodoroApi from '../../services/pomodoroApi';
 
 export default function Pomodoro() {
@@ -10,6 +11,7 @@ export default function Pomodoro() {
   const [isNotesOpen, setIsNotesOpen] = useState(false);
   const [isFlashOpen, setIsFlashOpen] = useState(false);
   const [isQuizOpen, setIsQuizOpen] = useState(false);
+  const [isBookmarkOpen, setIsBookmarkOpen] = useState(false);
   const [starting, setStarting] = useState(false);
   const durations = [
     { label: '10 min (2 min break)', minutes: 10 },
@@ -42,6 +44,17 @@ export default function Pomodoro() {
     }
   }
 
+  // helper to ensure only one modal open at a time
+  function openOnly(modalSetter) {
+    // close all first
+    setIsNotesOpen(false);
+    setIsFlashOpen(false);
+    setIsQuizOpen(false);
+    setIsBookmarkOpen(false);
+    // open requested
+    modalSetter(true);
+  }
+
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-50 p-4">
       <div className="w-full max-w-4xl bg-white rounded-lg shadow-lg p-6 grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -49,6 +62,7 @@ export default function Pomodoro() {
         <div className="md:col-span-2 flex flex-col items-center justify-center">
           {!session ? (
             <div className="w-full max-w-md text-center">
+              <a href="/home">Back</a>
               <h1 className="text-2xl font-semibold mb-4">Pomodoro Focus Mode</h1>
               <p className="text-sm text-gray-600 mb-4">Choose a focus duration to begin.</p>
               <div className="space-y-3">
@@ -79,9 +93,30 @@ export default function Pomodoro() {
             <h3 className="font-medium mb-2">Study Tools</h3>
             <p className="text-sm text-gray-600 mb-3">Quickly open notes, flashcards, or quizzes without leaving focus mode.</p>
             <div className="flex flex-col gap-2">
-              <button onClick={() => setIsNotesOpen(true)} className="px-3 py-2 bg-gray-100 rounded hover:bg-gray-200 text-left">Notes</button>
-              <button onClick={() => setIsFlashOpen(true)} className="px-3 py-2 bg-gray-100 rounded hover:bg-gray-200 text-left">Flashcards</button>
-              <button onClick={() => setIsQuizOpen(true)} className="px-3 py-2 bg-gray-100 rounded hover:bg-gray-200 text-left">Quizzes</button>
+              <button
+                onClick={() => openOnly(setIsNotesOpen)}
+                className="px-3 py-2 bg-gray-100 rounded hover:bg-gray-200 text-left"
+              >
+                Notes
+              </button>
+              <button
+                onClick={() => openOnly(setIsFlashOpen)}
+                className="px-3 py-2 bg-gray-100 rounded hover:bg-gray-200 text-left"
+              >
+                Flashcards
+              </button>
+              <button
+                onClick={() => openOnly(setIsQuizOpen)}
+                className="px-3 py-2 bg-gray-100 rounded hover:bg-gray-200 text-left"
+              >
+                Quizzes
+              </button>
+              <button
+                onClick={() => openOnly(setIsBookmarkOpen)}
+                className="px-3 py-2 bg-gray-100 rounded hover:bg-gray-200 text-left"
+              >
+                Bookmarks
+              </button>
             </div>
           </div>
 
@@ -104,18 +139,11 @@ export default function Pomodoro() {
         </div>
       </div>
 
-      {/* Modals */}
-      {isNotesOpen && (
-        <NotesModal onClose={() => setIsNotesOpen(false)} />
-      )}
-
-      {isFlashOpen && (
-        <FlashcardsModal onClose={() => setIsFlashOpen(false)} />
-      )}
-
-      {isQuizOpen && (
-        <QuizModal onClose={() => setIsQuizOpen(false)} />
-      )}
+      {/* Modals - only one can be opened at a time via openOnly() */}
+      {isNotesOpen && <NotesModal onClose={() => setIsNotesOpen(false)} />}
+      {isFlashOpen && <FlashcardsModal onClose={() => setIsFlashOpen(false)} />}
+      {isQuizOpen && <QuizModal onClose={() => setIsQuizOpen(false)} />}
+      {isBookmarkOpen && <BookmarkModal onClose={() => setIsBookmarkOpen(false)} />}
     </div>
   );
 }
