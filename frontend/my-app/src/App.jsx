@@ -13,7 +13,10 @@ import Flashcards from "./pages/private/Flashcards";
 import FlashcardDeckView from "./pages/private/FlashcardDeckView";
 import MyQuizzes from "./pages/private/MyQuizzes";
 import TakeQuiz from './pages/private/TakeQuiz';
-import Pomodoro from './pages/private/Pomodoro'; // <-- added import
+import Pomodoro from './pages/private/Pomodoro';
+import SpacesPage from "./pages/public/SpacesPage";
+import SpaceView from "./pages/public/SpaceView";
+import { SocketProvider } from "./context/SocketContext";
 
 // Protected Route wrapper component
 const ProtectedRoute = ({ children }) => {
@@ -26,113 +29,119 @@ function App() {
   const isLandingPage = location.pathname === '/';
 
   return (
-    <div>
-      {isLandingPage && (
-        <div style={{
-          textAlign: 'center',
-          padding: '50px',
-          minHeight: '100vh',
-          display: 'flex',
-          flexDirection: 'column',
-          justifyContent: 'center',
-          alignItems: 'center'
-        }}>
-          <h1 style={{ fontSize: '2.5rem', marginBottom: '20px' }}>StudyHub</h1>
-          <p style={{ fontSize: '1.2rem', marginBottom: '30px' }}>Your personal study companion.</p>
+    <SocketProvider>
+      <div>
+        {isLandingPage && (
+          <div style={{
+            textAlign: 'center',
+            padding: '50px',
+            minHeight: '100vh',
+            display: 'flex',
+            flexDirection: 'column',
+            justifyContent: 'center',
+            alignItems: 'center'
+          }}>
+            <h1 style={{ fontSize: '2.5rem', marginBottom: '20px' }}>StudyHub</h1>
+            <p style={{ fontSize: '1.2rem', marginBottom: '30px' }}>Your personal study companion.</p>
 
-          <div style={{ display: 'flex', gap: '20px' }}>
-            <Link to="/login" style={{
-              padding: '10px 30px',
-              backgroundColor: '#007bff',
-              color: 'white',
-              textDecoration: 'none',
-              borderRadius: '5px'
-            }}>
-              Login
-            </Link>
-            <Link to="/signup" style={{
-              padding: '10px 30px',
-              backgroundColor: '#28a745',
-              color: 'white',
-              textDecoration: 'none',
-              borderRadius: '5px'
-            }}>
-              Sign Up
-            </Link>
+            <div style={{ display: 'flex', gap: '20px' }}>
+              <Link to="/login" style={{
+                padding: '10px 30px',
+                backgroundColor: '#007bff',
+                color: 'white',
+                textDecoration: 'none',
+                borderRadius: '5px'
+              }}>
+                Login
+              </Link>
+              <Link to="/signup" style={{
+                padding: '10px 30px',
+                backgroundColor: '#28a745',
+                color: 'white',
+                textDecoration: 'none',
+                borderRadius: '5px'
+              }}>
+                Sign Up
+              </Link>
+            </div>
           </div>
-        </div>
-      )}
+        )}
 
-      <Routes>
-        <Route path="/login" element={<Login />} />
-        <Route path="/signup" element={<Signup />} />
-        <Route path="/home" element={
-          <ProtectedRoute>
-            <Home />
-          </ProtectedRoute>
-        } />
-        <Route path="/home-public" element={
-          <ProtectedRoute>
-            <HomePublic />
-          </ProtectedRoute>
-        } />
-        <Route path="/notes" element={
-          <ProtectedRoute>
-            <OwnNotes />
-          </ProtectedRoute>
-        } />
-        <Route path="/public-notes" element={
-          <ProtectedRoute>
-            <PublicNotes />
-          </ProtectedRoute>
-        } />
-        <Route path="/notes/:id" element={
-          <ProtectedRoute>
-            <ViewNote />
-          </ProtectedRoute>
-        } />
-        <Route path="/bookmarks" element={
-          <ProtectedRoute>
-            <BookmarkedNotes />
-          </ProtectedRoute>
-        } />
-        <Route path="/study-planner" element={
-          <ProtectedRoute>
-            <StudyPlanner />
-          </ProtectedRoute>
-        } />
+        <Routes>
+          <Route path="/login" element={<Login />} />
+          <Route path="/signup" element={<Signup />} />
+          <Route path="/home" element={
+            <ProtectedRoute>
+              <Home />
+            </ProtectedRoute>
+          } />
+          <Route path="/home-public" element={
+            <ProtectedRoute>
+              <HomePublic />
+            </ProtectedRoute>
+          } />
+          <Route path="/notes" element={
+            <ProtectedRoute>
+              <OwnNotes />
+            </ProtectedRoute>
+          } />
+          <Route path="/public-notes" element={
+            <ProtectedRoute>
+              <PublicNotes />
+            </ProtectedRoute>
+          } />
+          <Route path="/notes/:id" element={
+            <ProtectedRoute>
+              <ViewNote />
+            </ProtectedRoute>
+          } />
+          <Route path="/bookmarks" element={
+            <ProtectedRoute>
+              <BookmarkedNotes />
+            </ProtectedRoute>
+          } />
+          <Route path="/study-planner" element={
+            <ProtectedRoute>
+              <StudyPlanner />
+            </ProtectedRoute>
+          } />
 
-        {/* Flashcards routes (protected) */}
-        <Route path="/flashcards" element={
-          <ProtectedRoute>
-            <Flashcards />
-          </ProtectedRoute>
-        } />
-        <Route path="/flashcards/deck/:deckId" element={
-          <ProtectedRoute>
-            <FlashcardDeckView />
-          </ProtectedRoute>
-        } />
+          {/* Flashcards routes (protected) */}
+          <Route path="/flashcards" element={
+            <ProtectedRoute>
+              <Flashcards />
+            </ProtectedRoute>
+          } />
+          <Route path="/flashcards/deck/:deckId" element={
+            <ProtectedRoute>
+              <FlashcardDeckView />
+            </ProtectedRoute>
+          } />
 
-        {/* My Quizzes route (protected) */}
-        <Route path="/my-quizzes" element={
-          <ProtectedRoute>
-            <MyQuizzes />
-          </ProtectedRoute>
-        } />
+          {/* My Quizzes route (protected) */}
+          <Route path="/my-quizzes" element={
+            <ProtectedRoute>
+              <MyQuizzes />
+            </ProtectedRoute>
+          } />
 
-        <Route path="/quizzes/take/:id" element={<TakeQuiz />} />
+          <Route path="/quizzes/take/:id" element={<TakeQuiz />} />
 
-        {/* Pomodoro protected route */}
-        <Route path="/pomodoro" element={
-          <ProtectedRoute>
-            <Pomodoro />
-          </ProtectedRoute>
-        } />
+          {/* Pomodoro protected route */}
+          <Route path="/pomodoro" element={
+            <ProtectedRoute>
+              <Pomodoro />
+            </ProtectedRoute>
+          } />
 
-        <Route path="/" element={null} />
-      </Routes>
-    </div>
+          {/* Public Spaces listing and dedicated space view */}
+          <Route path="/spaces" element={<SpacesPage />} />
+          <Route path="/spaces/:id" element={<SpaceView />} />
+
+          <Route path="/" element={null} />
+        </Routes>
+      </div>
+    </SocketProvider>
   );
 }
 

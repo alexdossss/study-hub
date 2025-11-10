@@ -1,4 +1,5 @@
 import express from 'express';
+import http from 'http';
 import dotenv from 'dotenv';
 import cors from 'cors';
 import connectDB from './config/db.js';
@@ -9,10 +10,11 @@ import flashcardRoutes from './routes/flashcardRoutes.js';
 import aiRoutes from './routes/aiRoutes.js';
 import quizRoutes from './routes/quizRoutes.js';
 import pomodoroRoutes from './routes/pomodoroRoutes.js';
+import spaceRoutes from './routes/spaceRoutes.js';
 import { fileURLToPath } from 'url';
 import { dirname, join } from 'path';
 import fs from 'fs';
-import path from 'path';
+import { initSocket } from './utils/socket.js';
 
 dotenv.config();
 const app = express();
@@ -35,11 +37,9 @@ app.use(express.urlencoded({ limit: '10mb', extended: true }));
 // Serve uploaded files statically
 app.use('/uploads', express.static(uploadsDir));
 
-// Add this middleware (replace 5173 with your dev port if different)
+// Security / embed headers (optional)
 app.use((req, res, next) => {
-  // Remove or relax X-Frame-Options (avoid SAMEORIGIN blocking cross-origin if iframe served from backend)
   res.removeHeader('X-Frame-Options');
-  // Allow the frontend origin to embed backend-served files
   res.setHeader('Content-Security-Policy', "frame-ancestors 'self' http://localhost:5173 http://127.0.0.1:5173");
   next();
 });
@@ -48,21 +48,27 @@ app.use((req, res, next) => {
 app.use('/api/users', userRoutes);
 app.use('/api/notes', noteRoutes);
 app.use('/api/study', studyRoutes);
-
-// mount flashcards and AI endpoints
 app.use('/api/flashcards', flashcardRoutes);
 app.use('/api/ai', aiRoutes);
-
-// register quiz routes (ES module import)
 app.use('/api/quizzes', quizRoutes);
-
-// register pomodoro routes
 app.use('/api/pomodoro', pomodoroRoutes);
+app.use('/api/spaces', spaceRoutes);
 
-// Connect to database
-connectDB();
-
+// Connect to database and start server with socket.io
 const PORT = process.env.PORT || 5000;
-app.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
-});
+async function start() {
+  try {
+    await connectDB();
+    const server = http.createServer(app);
+    // initialize socket.io with the http server; FRONTEND_ORIGIN env optional
+    initSocket(server, { origin: process.env.FRONTEND_ORIGIN || `http://localhost:5173` });
+    server.listen(PORT, () => {
+      console.log(`Server running on port ${PORT}`);
+    });
+  } catch (err) {
+    console.error('Failed to start server', err);
+    process.exit(1);
+  }
+}
+
+start();

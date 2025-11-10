@@ -37,6 +37,20 @@ function HomePublic() {
         </button>
 
         <button 
+          onClick={() => navigate('/spaces')}
+          style={{
+            padding: "10px 20px",
+            backgroundColor: "#007bff",
+            color: "white",
+            border: "none",
+            borderRadius: "5px",
+            cursor: "pointer"
+          }}
+        >
+          Spaces
+        </button>
+
+        <button 
           onClick={toggleView}
           style={{
             padding: "10px 20px",
