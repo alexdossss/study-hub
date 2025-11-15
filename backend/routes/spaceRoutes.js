@@ -13,6 +13,9 @@ router.get('/', spaceController.listSpaces);
 // Get space details
 router.get('/:spaceId', spaceController.getSpace);
 
+// shared content listing (combined)
+router.get('/:spaceId/shared/items', protect, spaceController.getSharedItems); // protect so shared meta visible to members
+
 /**
  * Authenticated routes
  */
@@ -30,11 +33,13 @@ router.post('/:spaceId/leave', protect, spaceController.leaveSpace);
 // Admin remove member
 router.post('/:spaceId/remove', protect, spaceController.removeMember);
 
-// Share a note into space
+// Sharing endpoints
 router.post('/:spaceId/share/note', protect, spaceController.shareNote);
+router.post('/:spaceId/share/flashcard', protect, spaceController.shareFlashcard);
+router.post('/:spaceId/share/quiz', protect, spaceController.shareQuiz);
 
-// Get shared notes for a space (members expected to call)
-router.get('/:spaceId/shared/notes', protect, spaceController.getSharedNotes);
+// Unshare
+router.post('/:spaceId/unshare', protect, spaceController.unshareItem);
 
 // Chat endpoints
 router.post('/:spaceId/messages', protect, spaceController.postMessage);
